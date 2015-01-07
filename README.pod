@@ -98,9 +98,9 @@ The I<button> field is optional, it defaults to the left button, and it's a numb
 
 =item B<I>:I<filename>:
 
-Load an image. The individual characters between the opening and closing tags act as formatters and default strings if the file doesn't exist.
+Load an image. Currently only PNG files are supported.
 
-Eg. I<%{I:battery.png:} B %{I}>
+Eg. I<%{I:battery.png:}>
 
 =item B<S>I<dir>
 
