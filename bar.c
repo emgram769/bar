@@ -106,6 +106,16 @@ cairo_set_color (cairo_t *cr, const int i)
 fill_rect (cairo_t *cr, const int i, int x, int y, int width, int height)
 {
   if (background) {
+    //cairo_set_source_surface(cr, background, 0, 0);
+    //cairo_rectangle(cr, x, y, width, height);
+    //cairo_arc(cr, x + 10, y + 10, 10, 0, 2 * 3.1415);
+    cairo_move_to(cr, x, y);
+    cairo_rel_line_to(cr, width, 0);
+    cairo_rel_line_to(cr, 0, height);
+    cairo_rel_line_to(cr, -width, 0);
+    cairo_close_path(cr);
+    cairo_clip(cr);
+    //cairo_paint(cr); 
     return;
   } else {
     cairo_set_color(cr, i);
@@ -124,13 +134,16 @@ cairo_copy (cairo_t *cr, cairo_surface_t *s, int sx, int sy, int dx, int dy, int
 }
 
   cairo_surface_t *
-load_image (char *filename)
+load_image (char *filename, int force_reload)
 {
   int i;
   for (i = 0; i < MAX_IMAGES; i++) {
     if (imgs[i].filename[0] == '\0') {
       break;
     } else if (!strncmp(filename, imgs[i].filename, MAX_IMAGE_FILENAME)) {
+      if (force_reload) {
+        imgs[i].data = cairo_image_surface_create_from_png(filename);
+      }
       return imgs[i].data;
     }
   }
@@ -148,10 +161,10 @@ load_image (char *filename)
 }
 
   int
-draw_image (monitor_t *mon, int x, int align, char *filename)
+draw_image (monitor_t *mon, int x, int align, char *filename, int force_reload)
 {
   cairo_surface_t *img;
-  img = load_image(filename);
+  img = load_image(filename, force_reload);
   int w = cairo_image_surface_get_width(img);
   int h = cairo_image_surface_get_height(img);
 
@@ -312,17 +325,20 @@ area_shift (xcb_window_t win, const int align, int delta)
   }
 }
 
-bool get_image_file(char *str, char *optend, char **end, char **file)
+bool get_image_file(char *str, char *optend, char **end, char **file, int *force_reload)
 {
   char *p = str;
 
   /* Invalid tag. */
-  if (*p != ':') {
+  if (*p != ':' && *p != '|') {
     *end = p;
     return false;
   }
 
-  char *trail = strchr(++p, ':');
+  char end_char = *p;
+  *force_reload = (end_char == '|');
+
+  char *trail = strchr(++p, end_char);
 
   /* Find the trailing : and make sure it's whitin the formatting block, also reject empty files */
   if (!trail || p == trail || trail > optend) {
@@ -451,8 +467,8 @@ parse (char *text)
           case 'r': pos_x = 0; align = ALIGN_R; break;
 
           case 'I':
-                    if (get_image_file(p, end, &p, &file)) {
-                      int w = draw_image(cur_mon, pos_x, align, file);
+                    if (get_image_file(p, end, &p, &file, &tmp)) {
+                      int w = draw_image(cur_mon, pos_x, align, file, tmp);
                       pos_x += w;
                       area_shift(cur_mon->window, align, w);
                     }
