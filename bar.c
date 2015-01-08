@@ -85,6 +85,7 @@ static uint32_t fgc, bgc;
 static area_stack_t astack;
 static image_t imgs[MAX_IMAGES];
 static char *img_file;
+static cairo_surface_t *background;
 
 enum {
   PAL_BG,
@@ -104,10 +105,14 @@ cairo_set_color (cairo_t *cr, const int i)
   void
 fill_rect (cairo_t *cr, const int i, int x, int y, int width, int height)
 {
-  cairo_set_color(cr, i);
-  cairo_rectangle(cr, x, y, width, height);
-  cairo_stroke_preserve(cr);
-  cairo_fill(cr);
+  if (background) {
+    return;
+  } else {
+    cairo_set_color(cr, i);
+    cairo_rectangle(cr, x, y, width, height);
+    cairo_stroke_preserve(cr);
+    cairo_fill(cr);
+  }
 }
 
   void
@@ -1087,7 +1092,16 @@ main (int argc, char **argv)
       case 'd': dock = true; break;
       case 'f': parse_font_list(optarg); break;
       case 'u': bu = strtoul(optarg, NULL, 10); break;
-      case 'B': bgc = parse_color(optarg, NULL, scr->black_pixel); break;
+      case 'B':
+        if (strlen(optarg) > 4 &&
+            !strncmp(".png", &optarg[strlen(optarg) - 4], 4)) {
+          if (access(optarg, F_OK) != -1) {
+            background = cairo_image_surface_create_from_png(optarg);
+            break;
+          }
+        }
+        bgc = parse_color(optarg, NULL, scr->black_pixel);
+        break;
       case 'F': fgc = parse_color(optarg, NULL, scr->white_pixel); break;
     }
   }
@@ -1118,6 +1132,13 @@ main (int argc, char **argv)
       if (pollin[0].revents & POLLIN) { /* New input, process it */
         if (fgets(input, sizeof(input), stdin) == NULL)
           break; /* EOF received */
+
+        if (background) {
+          for (monitor_t *mon = monhead; mon; mon = mon->next) {
+            cairo_set_source_surface(mon->cr, background, 0, 0);
+            cairo_paint(mon->cr);
+          }
+        }
 
         parse(input);
         redraw = true;
