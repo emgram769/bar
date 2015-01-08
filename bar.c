@@ -155,9 +155,6 @@ draw_image (monitor_t *mon, int x, int align, char *filename)
   int w = cairo_image_surface_get_width(img);
   int h = cairo_image_surface_get_height(img);
 
-  /* Draw the background first */
-  fill_rect(mon->cr, PAL_BG, x, by, w, bh);
-
   switch (align) {
     case ALIGN_C:
       cairo_copy(mon->cr, mon->surface, mon->width / 2 - x / 2, 0, mon->width / 2 - (x + w) / 2, 0, x, bh);
@@ -168,6 +165,9 @@ draw_image (monitor_t *mon, int x, int align, char *filename)
       x = mon->width - w;
       break;
   }
+
+  /* Draw the background first */
+  fill_rect(mon->cr, PAL_BG, x, by, w, bh);
 
   cairo_set_source_surface(mon->cr, img, x, 0);
   cairo_mask_surface(mon->cr, img, x, 0);
