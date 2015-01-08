@@ -44,9 +44,9 @@ Make bar permanent, don't exit after the standard input is closed.
 
 Sets the underline width in pixels. The default is 1.
 
-=item B<-B> I<color>
+=item B<-B> I<color/image>
 
-Set the background color of the bar. I<color> might be either in hex format (#aarrggbb) or in the symbolic name format (eg. white, brightred, darkgray). If no compositor such as compton or xcompmgr is running the alpha channel is silently ignored.
+Set the background color or image of the bar. I<color> might be either in hex format (#aarrggbb) or in the symbolic name format (eg. white, brightred, darkgray). If the argument ends in I<.png> it will be loaded as an image. If no compositor such as compton or xcompmgr is running the alpha channel is silently ignored.
 
 =item B<-F> I<color>
 
