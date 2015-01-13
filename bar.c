@@ -101,21 +101,16 @@ cairo_set_color (cairo_t *cr, const int i)
 {
   cairo_set_source_rgba(cr, palette[i].r, palette[i].g, palette[i].b, palette[i].a);
 }
+  void
+cairo_set_clear (cairo_t *cr)
+{
+  cairo_set_source_rgba(cr, 0, 0, 0, 1);
+}
 
   void
 fill_rect (cairo_t *cr, const int i, int x, int y, int width, int height)
 {
   if (background) {
-    //cairo_set_source_surface(cr, background, 0, 0);
-    //cairo_rectangle(cr, x, y, width, height);
-    //cairo_arc(cr, x + 10, y + 10, 10, 0, 2 * 3.1415);
-    cairo_move_to(cr, x, y);
-    cairo_rel_line_to(cr, width, 0);
-    cairo_rel_line_to(cr, 0, height);
-    cairo_rel_line_to(cr, -width, 0);
-    cairo_close_path(cr);
-    cairo_clip(cr);
-    //cairo_paint(cr); 
     return;
   } else {
     cairo_set_color(cr, i);
@@ -1157,6 +1152,7 @@ main (int argc, char **argv)
         }
 
         parse(input);
+
         redraw = true;
       }
       if (pollin[1].revents & POLLIN) { /* Xserver broadcasted an event */

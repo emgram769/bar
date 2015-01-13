@@ -98,7 +98,7 @@ The I<button> field is optional, it defaults to the left button, and it's a numb
 
 =item B<I>:I<filename>:
 
-Load an image. Currently only PNG files are supported.
+Load an image. By default the images are cached (for icon use), but in the case of dynamic updates (such as album art), use '|' instead of ':'. Currently only PNG files are supported.
 
 Eg. I<%{I:battery.png:}>
 
